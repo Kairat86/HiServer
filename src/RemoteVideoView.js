@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 export default class RemoteVideoView extends Component {
 
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             have_video: false,
             have_audio: false,
@@ -30,23 +30,23 @@ export default class RemoteVideoView extends Component {
             clientHeight:document.body.offsetHeight,
         });
         window.addEventListener('resize', this.onWindowResize);
-    }
+    };
 
     componentWillUnmount = () => {
         window.removeEventListener('resize', this.onWindowResize);
-    }
+    };
 
     play = () => {
         let video  = this.refs[this.props.id];
         video.play();
-    }
+    };
 
     onWindowResize = () => {
         this.setState({
             clientWidth:document.body.offsetWidth,
             clientHeight:document.body.offsetHeight,
         });
-    }
+    };
 
     render() {
         const style = {
