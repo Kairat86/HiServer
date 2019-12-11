@@ -4,18 +4,12 @@ import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/st
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
 import blue from '@material-ui/core/colors/blue';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItem from '@material-ui/core/ListItem';
 import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
 import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
 import Slide from '@material-ui/core/Slide';
-import VideoCamIcon from '@material-ui/icons/Videocam';
 import VideoOnIcon from '@material-ui/icons/Videocam';
-import CallIcon from '@material-ui/icons/Call';
 import PhoneIcon from '@material-ui/icons/CallEnd';
 import VideoOffIcon from '@material-ui/icons/VideocamOff';
 import MicIcon from '@material-ui/icons/Mic';
@@ -24,7 +18,7 @@ import LocalVideoView from './LocalVideoView';
 import RemoteVideoView from './RemoteVideoView';
 import css from './layout.css';
 import Signaling from './Signaling';
-import {CircularProgress} from "@material-ui/core";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const theme = createMuiTheme({
     palette: {
@@ -104,7 +98,7 @@ class App extends Component {
         this.signaling.on('leave', (to) => {
             this.setState({open: false, localStream: null, remoteStream: null});
         });
-    }
+    };
 
     handleClickOpen = () => {
         this.setState({open: true});
@@ -172,35 +166,37 @@ class App extends Component {
                 <div className={classes.root}>
 
                     <List>
-                        {
-                            this.state.peers.map((peer, i) => {
-                                return (
-                                    <div key={peer.id}>
-                                        <ListItem button>
-                                            <ListItemText
-                                                primary={peer.name + '  [' + peer.user_agent + ']' + (peer.id === this.state.self_id ? ' (Yourself)' : '')}
-                                                secondary={(peer.id === this.state.self_id ? 'self' : 'peer') + '-id: ' + peer.id}/>
-                                            {peer.id !== this.state.self_id &&
-                                            <div>
-                                                <IconButton color="primary"
-                                                            onClick={() => this.handleInvitePeer(peer.id, 'audio')}
-                                                            className={classes.button} aria-label="Make a voice call.">
-                                                    <CallIcon/>
-                                                </IconButton>
-                                                <IconButton color="primary"
-                                                            onClick={() => this.handleInvitePeer(peer.id, 'video')}
-                                                            className={classes.button} aria-label="Make a video call.">
-                                                    <VideoCamIcon/>
-                                                </IconButton>
-                                            </div>
-                                            }
-                                        </ListItem>
-                                        <Divider/>
-                                    </div>
-                                )
-                            })
-                        }
+                        {/*{*/}
+                        {/*    this.state.peers.map((peer, i) => {*/}
+                        {/*        return (*/}
+                        {/*            <div key={peer.id}>*/}
+                        {/*                <ListItem button>*/}
+                        {/*                    <ListItemText*/}
+                        {/*                        primary={peer.name + '  [' + peer.user_agent + ']' + (peer.id === this.state.self_id ? ' (Yourself)' : '')}*/}
+                        {/*                        secondary={(peer.id === this.state.self_id ? 'self' : 'peer') + '-id: ' + peer.id}/>*/}
+                        {/*                    {peer.id !== this.state.self_id &&*/}
+                        {/*                    <div>*/}
+                        {/*                        <IconButton color="primary"*/}
+                        {/*                                    onClick={() => this.handleInvitePeer(peer.id, 'audio')}*/}
+                        {/*                                    className={classes.button} aria-label="Make a voice call.">*/}
+                        {/*                            <CallIcon/>*/}
+                        {/*                        </IconButton>*/}
+                        {/*                        <IconButton color="primary"*/}
+                        {/*                                    onClick={() => this.handleInvitePeer(peer.id, 'video')}*/}
+                        {/*                                    className={classes.button} aria-label="Make a video call.">*/}
+                        {/*                            <VideoCamIcon/>*/}
+                        {/*                        </IconButton>*/}
+                        {/*                    </div>*/}
+                        {/*                    }*/}
+                        {/*                </ListItem>*/}
+                        {/*                <Divider/>*/}
+                        {/*            </div>*/}
+                        {/*        )*/}
+                        {/*    })*/}
+                        {/*}*/}
                     </List>
+                    <CircularProgress/>
+                    <h5 style={{marginLeft: '-35%'}}>Waiting for an interlocutor...</h5>
                     <Dialog
                         fullScreen
                         open={this.state.open}

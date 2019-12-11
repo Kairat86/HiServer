@@ -36,7 +36,7 @@ class CallHandler {
             cert: fs.readFileSync('certs/cert.pem')
         };
 
-        var wss_server_port = (process.env.PORT + 1 || 4443);
+        const wss_server_port = (process.env.PORT + 1 || 4443);
         this.ssl_server = https.createServer(options, app).listen(wss_server_port, () => {
             console.log("Start WSS Server: bind => wss://0.0.0.0:" + wss_server_port);
         });
@@ -47,7 +47,6 @@ class CallHandler {
 
     updatePeers = () => {
         const peers = [];
-        const cands = [];
 
         this.clients.forEach(function (client) {
             const peer = {};
@@ -63,24 +62,24 @@ class CallHandler {
             if (client.hasOwnProperty('session_id')) {
                 peer.session_id = client.session_id;
             }
+            peer.busy = client.busy || false;
             peers.push(peer);
-            cands.push(peer)
         });
 
         const msg = {
             type: "peers",
             data: peers,
         };
-
+        console.log('update p=>' + JSON.stringify(msg));
         let _send = this._send;
         this.clients.forEach(function (client) {
             _send(client, JSON.stringify(msg));
         });
     };
 
-    onClose = (client_self, data) => {
+    onClose = (client_self) => {
         console.log('close');
-        var session_id = client_self.session_id;
+        const session_id = client_self.session_id;
         //remove old session_id
         if (session_id !== undefined) {
             for (let i = 0; i < this.sessions.length; i++) {
@@ -114,10 +113,11 @@ class CallHandler {
 
         client_self.on("close", (data) => {
             this.clients.delete(client_self);
-            this.onClose(client_self, data)
+            this.onClose(client_self)
         });
 
         client_self.on("message", message => {
+            let msg;
             try {
                 message = JSON.parse(message);
                 console.log("message.type:: " + message.type + ", \nbody: " + JSON.stringify(message));
@@ -142,7 +142,7 @@ class CallHandler {
                     });
 
                     if (!session) {
-                        var msg = {
+                        msg = {
                             type: "error",
                             data: {
                                 error: "Invalid session " + message.session_id,
@@ -155,8 +155,7 @@ class CallHandler {
                     this.clients.forEach((client) => {
                         if (client.session_id === message.session_id) {
                             try {
-
-                                var msg = {
+                                const msg = {
                                     type: "bye",
                                     data: {
                                         session_id: message.session_id,
@@ -173,7 +172,7 @@ class CallHandler {
                 }
                     break;
                 case "offer": {
-                    var peer = null;
+                    let peer = null;
                     this.clients.forEach(function (client) {
                         if (client.hasOwnProperty('id') && client.id === "" + message.to) {
                             peer = client;
@@ -181,7 +180,6 @@ class CallHandler {
                     });
 
                     if (peer != null) {
-
                         msg = {
                             type: "offer",
                             data: {
@@ -191,9 +189,8 @@ class CallHandler {
                                 session_id: message.session_id,
                                 description: message.description,
                             }
-                        }
+                        };
                         _send(peer, JSON.stringify(msg));
-
                         peer.session_id = message.session_id;
                         client_self.session_id = message.session_id;
 
@@ -203,12 +200,18 @@ class CallHandler {
                             to: peer.id,
                         };
                         this.sessions.push(session);
+                        client_self.busy = true;
+                        for (const c of this.clients) {
+                            if (c.id === peer.id) {
+                                c.busy = true;
+                                break
+                            }
+                        }
                     }
-
                     break;
                 }
                 case 'answer': {
-                    var msg = {
+                    msg = {
                         type: "answer",
                         data: {
                             from: client_self.id,
@@ -229,7 +232,7 @@ class CallHandler {
                 }
                     break;
                 case 'candidate': {
-                    var msg = {
+                    msg = {
                         type: "candidate",
                         data: {
                             from: client_self.id,
@@ -256,7 +259,7 @@ class CallHandler {
                     console.log("Unhandled message: " + message.type);
             }
         });
-    }
+    };
 
     _send = (client, message) => {
         try {

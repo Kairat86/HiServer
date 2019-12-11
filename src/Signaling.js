@@ -1,7 +1,7 @@
 import * as events from 'events';
 import browser from 'bowser';
 
-var RTCPeerConnection;
+let RTCPeerConnection;
 var RTCSessionDescription;
 var configuration;
 
@@ -296,7 +296,7 @@ export default class Signaling extends events.EventEmitter {
                 }, this.logError);
             }
         });
-    }
+    };
 
     onAnswer = (message) => {
         var data = message.data;
@@ -310,7 +310,7 @@ export default class Signaling extends events.EventEmitter {
             pc.setRemoteDescription(new RTCSessionDescription(data.description), () => {
             }, this.logError);
         }
-    }
+    };
 
     onCandidate = (message) => {
         var data = message.data;
@@ -322,7 +322,7 @@ export default class Signaling extends events.EventEmitter {
         if (pc && data.candidate) {
             pc.addIceCandidate(new RTCIceCandidate(data.candidate));
         }
-    }
+    };
 
     onLeave = (message) => {
         var id = message.data;
@@ -338,7 +338,7 @@ export default class Signaling extends events.EventEmitter {
             this.closeMediaStream(this.local_stream);
             this.local_stream = null;
         }
-    }
+    };
 
     onBye = (message) => {
         var data = message.data;
@@ -357,11 +357,11 @@ export default class Signaling extends events.EventEmitter {
             this.local_stream = null;
         }
         this.session_id = '0-0';
-    }
+    };
 
     logError = (error) => {
         console.log("logError", error);
-    }
+    };
 
     sendText() {
         var text = "test send text...";//document.getElementById('textRoomInput').value;
