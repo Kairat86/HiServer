@@ -1,26 +1,25 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import PropTypes from "prop-types";
-import css from './layout.css';
 import VideoOffIcon from '@material-ui/icons/VideocamOff';
 
 export default class LocalVideoView extends Component {
 
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {}
     }
 
     componentDidMount = () => {
         let video = this.refs[this.props.id];
         video.srcObject = this.props.stream;
-        video.onplaying =  () => {
+        video.onplaying = () => {
             this.setState({show_sping: false});
         };
 
         video.onloadedmetadata = function (e) {
             video.play();
         };
-    }
+    };
 
     render() {
 
@@ -44,18 +43,18 @@ export default class LocalVideoView extends Component {
             top: '50%',
             width: '100%',
             transform: 'translateY(-50%)',
-            color:'#fff',
-          }
+            color: '#fff',
+        };
 
         return (
             <div key={this.props.id}
-                style={small}>
+                 style={small}>
                 {
-                   
-                    this.props.muted? <VideoOffIcon style={videoMuteImg}/> : null
+
+                    this.props.muted ? <VideoOffIcon style={videoMuteImg}/> : null
                 }
                 <video ref={this.props.id} id={this.props.id} autoPlay playsInline muted={true}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', }} />
+                       style={{width: '100%', height: '100%', objectFit: 'cover',}}/>
             </div>
         )
     }
@@ -64,4 +63,4 @@ export default class LocalVideoView extends Component {
 LocalVideoView.propTypes = {
     stream: PropTypes.any.isRequired,
     id: PropTypes.string,
-}
+};

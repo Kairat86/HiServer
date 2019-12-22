@@ -57,7 +57,7 @@ export default class RemoteVideoView extends Component {
             backgroundColor: '#323232',
             position: 'absolute',
             zIndex: 0,
-        }
+        };
 
         return (
             <div key={this.props.id} style={style}>
@@ -71,4 +71,4 @@ export default class RemoteVideoView extends Component {
 RemoteVideoView.propTypes = {
     stream: PropTypes.any.isRequired,
     id: PropTypes.string.isRequired,
-}
+};

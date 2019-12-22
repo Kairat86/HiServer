@@ -78,13 +78,13 @@ class CallHandler {
     };
 
     onClose = (client_self) => {
-        console.log('close');
+        console.log('close id=>' + client_self.id);
         const session_id = client_self.session_id;
         //remove old session_id
         if (session_id !== undefined) {
             for (let i = 0; i < this.sessions.length; i++) {
                 let item = this.sessions[i];
-                if (item.id == session_id) {
+                if (item.id === session_id) {
                     this.sessions.splice(i, 1);
                     break;
                 }
@@ -98,9 +98,9 @@ class CallHandler {
         let _send = this._send;
         this.clients.forEach(function (client) {
             if (client !== client_self)
-                _send(client, JSON.stringify(msg));
+                if (client.session_id === client_self.session_id) client.busy = false;
+            _send(client, JSON.stringify(msg));
         });
-
         this.updatePeers();
     };
 
@@ -136,7 +136,7 @@ class CallHandler {
                 case 'bye': {
                     let session = null;
                     this.sessions.forEach((sess) => {
-                        if (sess.id == message.session_id) {
+                        if (sess.id === message.session_id) {
                             session = sess;
                         }
                     });
@@ -160,7 +160,7 @@ class CallHandler {
                                     data: {
                                         session_id: message.session_id,
                                         from: message.from,
-                                        to: (client.id == session.from ? session.to : session.from),
+                                        to: (client.id === session.from ? session.to : session.from),
                                     },
                                 };
                                 _send(client, JSON.stringify(msg));
@@ -253,6 +253,7 @@ class CallHandler {
                 }
                     break;
                 case 'keepalive':
+                    console.log("sId=>" + client_self.id);
                     _send(client_self, JSON.stringify({type: 'keepalive', data: {}}));
                     break;
                 default:
