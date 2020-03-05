@@ -14,6 +14,7 @@ import PhoneIcon from '@material-ui/icons/CallEnd';
 import VideoOffIcon from '@material-ui/icons/VideocamOff';
 import MicIcon from '@material-ui/icons/Mic';
 import MicOffIcon from '@material-ui/icons/MicOff';
+import SkipNextRoundedIcon from '@material-ui/icons/SkipNextRounded';
 import LocalVideoView from './LocalVideoView';
 import RemoteVideoView from './RemoteVideoView';
 import css from './layout.css';
@@ -228,15 +229,15 @@ class App extends Component {
                                     this.state.video_muted ? <VideoOffIcon/> : <VideoOnIcon/>
                                 }
                             </Button>
-                            <Button variant="fab" color="secondary" aria-label="add" style={styles.btnTool}
-                                    onClick={this.handleBye}>
-                                <PhoneIcon/>
-                            </Button>
                             <Button variant="fab" mini color="primary" aria-label="add" style={styles.btnTool}
                                     onClick={this.onAudioClickHandler}>
                                 {
                                     this.state.audio_muted ? <MicOffIcon/> : <MicIcon/>
                                 }
+                            </Button>
+                            <Button variant="fab" color="secondary" aria-label="add" style={styles.btnTool}
+                                    onClick={this.handleBye}>
+                                <SkipNextRoundedIcon/>
                             </Button>
                         </div>
 

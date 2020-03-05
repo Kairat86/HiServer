@@ -105,12 +105,8 @@ class CallHandler {
     };
 
     onConnection = (client_self) => {
-        console.log('connection');
-
         let _send = this._send;
-
         this.clients.add(client_self);
-
         client_self.on("close", (data) => {
             this.clients.delete(client_self);
             this.onClose(client_self)

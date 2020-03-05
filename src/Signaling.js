@@ -2,7 +2,7 @@ import * as events from 'events';
 import browser from 'bowser';
 
 let RTCPeerConnection;
-var RTCSessionDescription;
+let RTCSessionDescription;
 var configuration;
 
 export default class Signaling extends events.EventEmitter {
@@ -25,6 +25,7 @@ export default class Signaling extends events.EventEmitter {
 
         if (browser.safari) {
             var OrigPeerConnection = RTCPeerConnection;
+            
             RTCPeerConnection = function (pcConfig, pcConstraints) {
                 if (pcConfig && pcConfig.iceServers) {
                     var newIceServers = [];
@@ -148,6 +149,7 @@ export default class Signaling extends events.EventEmitter {
     }
 
     invite = (peer_id, media) => {
+        console.log("sI=>"+this.self_id)
         this.session_id = this.self_id + '-' + peer_id;
         this.getLocalStream(media).then((stream) => {
             this.local_stream = stream;
