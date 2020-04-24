@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
@@ -68,45 +68,59 @@ class App extends Component {
             video_muted: false,
         };
     }
-
+    getFreePeerId = (peers) => {
+        var i;
+        for (i in peers) {
+           const p = peers[i]
+            if (!p.busy && p.id != this.state.self_id) {
+                return p.id;
+            }
+        }
+        console.log("no free peer")
+        return null;
+    }
     componentDidMount = () => {
         var url = 'wss://' + window.location.hostname + ':4443';
-        this.signaling = new Signaling(url, "WebApp");
+        this.signaling = new Signaling(url, "hi");
         this.signaling.on('peers', (peers, self) => {
-            this.setState({peers, self_id: self});
+            this.setState({ peers, self_id: self });
+            const id = this.getFreePeerId(peers);
+            console.log(`id to call ${id}`)
+           if(id!=null) this.signaling.invite(id, "video")
         });
 
         this.signaling.on('new_call', (from, sessios) => {
-            this.setState({open: true});
+            console.log("new call")
+            this.setState({ open: true });
         });
 
         this.signaling.on('localstream', (stream) => {
-            this.setState({localStream: stream});
+            this.setState({ localStream: stream });
         });
 
         this.signaling.on('addstream', (stream) => {
-            this.setState({remoteStream: stream});
+            this.setState({ remoteStream: stream });
         });
 
         this.signaling.on('removestream', (stream) => {
-            this.setState({remoteStream: null});
+            this.setState({ remoteStream: null });
         });
 
         this.signaling.on('call_end', (to, session) => {
-            this.setState({open: false, localStream: null, remoteStream: null});
+            this.setState({ open: false, localStream: null, remoteStream: null });
         });
 
         this.signaling.on('leave', (to) => {
-            this.setState({open: false, localStream: null, remoteStream: null});
+            this.setState({ open: false, localStream: null, remoteStream: null });
         });
     };
 
     handleClickOpen = () => {
-        this.setState({open: true});
+        this.setState({ open: true });
     };
 
     handleClose = () => {
-        this.setState({open: false});
+        this.setState({ open: false });
     };
 
     handleInvitePeer = (peer_id, type) => {
@@ -123,7 +137,7 @@ class App extends Component {
     onVideoOnClickHandler = () => {
         let video_muted = !this.state.video_muted;
         this.onToggleLocalVideoTrack(video_muted);
-        this.setState({video_muted});
+        this.setState({ video_muted });
     };
 
     onToggleLocalVideoTrack = (muted) => {
@@ -144,7 +158,7 @@ class App extends Component {
     onAudioClickHandler = () => {
         let audio_muted = !this.state.audio_muted;
         this.onToggleLocalAudioTrack(audio_muted);
-        this.setState({audio_muted});
+        this.setState({ audio_muted });
     };
 
 
@@ -161,43 +175,12 @@ class App extends Component {
     };
 
     render() {
-        const {classes} = this.props;
+        const { classes } = this.props;
         return (
             <MuiThemeProvider theme={theme}>
                 <div className={classes.root}>
-
-                    <List>
-                        {/*{*/}
-                        {/*    this.state.peers.map((peer, i) => {*/}
-                        {/*        return (*/}
-                        {/*            <div key={peer.id}>*/}
-                        {/*                <ListItem button>*/}
-                        {/*                    <ListItemText*/}
-                        {/*                        primary={peer.name + '  [' + peer.user_agent + ']' + (peer.id === this.state.self_id ? ' (Yourself)' : '')}*/}
-                        {/*                        secondary={(peer.id === this.state.self_id ? 'self' : 'peer') + '-id: ' + peer.id}/>*/}
-                        {/*                    {peer.id !== this.state.self_id &&*/}
-                        {/*                    <div>*/}
-                        {/*                        <IconButton color="primary"*/}
-                        {/*                                    onClick={() => this.handleInvitePeer(peer.id, 'audio')}*/}
-                        {/*                                    className={classes.button} aria-label="Make a voice call.">*/}
-                        {/*                            <CallIcon/>*/}
-                        {/*                        </IconButton>*/}
-                        {/*                        <IconButton color="primary"*/}
-                        {/*                                    onClick={() => this.handleInvitePeer(peer.id, 'video')}*/}
-                        {/*                                    className={classes.button} aria-label="Make a video call.">*/}
-                        {/*                            <VideoCamIcon/>*/}
-                        {/*                        </IconButton>*/}
-                        {/*                    </div>*/}
-                        {/*                    }*/}
-                        {/*                </ListItem>*/}
-                        {/*                <Divider/>*/}
-                        {/*            </div>*/}
-                        {/*        )*/}
-                        {/*    })*/}
-                        {/*}*/}
-                    </List>
-                    <CircularProgress/>
-                    <h5 style={{marginLeft: '-35%'}}>Waiting for an interlocutor...</h5>
+                    <CircularProgress />
+                    <h5 style={{ marginLeft: '-35%' }}>Waiting for an interlocutor...</h5>
                     <Dialog
                         fullScreen
                         open={this.state.open}
@@ -214,30 +197,30 @@ class App extends Component {
                         <div>
                             {
                                 this.state.remoteStream != null ?
-                                    <RemoteVideoView stream={this.state.remoteStream} id={'remoteview'}/> : null
+                                    <RemoteVideoView stream={this.state.remoteStream} id={'remoteview'} /> : null
                             }
                             {
                                 this.state.localStream != null ?
                                     <LocalVideoView stream={this.state.localStream} muted={this.state.video_muted}
-                                                    id={'localview'}/> : null
+                                        id={'localview'} /> : null
                             }
                         </div>
                         <div className={css.btnTools}>
                             <Button variant="fab" mini color="primary" aria-label="add" style={styles.btnTool}
-                                    onClick={this.onVideoOnClickHandler}>
+                                onClick={this.onVideoOnClickHandler}>
                                 {
-                                    this.state.video_muted ? <VideoOffIcon/> : <VideoOnIcon/>
+                                    this.state.video_muted ? <VideoOffIcon /> : <VideoOnIcon />
                                 }
                             </Button>
                             <Button variant="fab" mini color="primary" aria-label="add" style={styles.btnTool}
-                                    onClick={this.onAudioClickHandler}>
+                                onClick={this.onAudioClickHandler}>
                                 {
-                                    this.state.audio_muted ? <MicOffIcon/> : <MicIcon/>
+                                    this.state.audio_muted ? <MicOffIcon /> : <MicIcon />
                                 }
                             </Button>
                             <Button variant="fab" color="secondary" aria-label="add" style={styles.btnTool}
-                                    onClick={this.handleBye}>
-                                <SkipNextRoundedIcon/>
+                                onClick={this.handleBye}>
+                                <SkipNextRoundedIcon />
                             </Button>
                         </div>
 

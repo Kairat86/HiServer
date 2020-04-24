@@ -27,7 +27,7 @@ class CallHandler {
             console.log("Start WS Server: bind => ws://0.0.0.0:" + ws_server_port);
         });
 
-        this.ws = new ws.Server({server: this.server});
+        this.ws = new ws.Server({ server: this.server });
         this.ws.on('connection', this.onConnection);
 
 
@@ -41,40 +41,38 @@ class CallHandler {
             console.log("Start WSS Server: bind => wss://0.0.0.0:" + wss_server_port);
         });
 
-        this.wss = new ws.Server({server: this.ssl_server});
+        this.wss = new ws.Server({ server: this.ssl_server });
         this.wss.on('connection', this.onConnection);
     }
 
-    updatePeers = () => {
+    getFreePeers = () => {
         const peers = [];
 
         this.clients.forEach(function (client) {
-            const peer = {};
-            if (client.hasOwnProperty('id')) {
-                peer.id = client.id;
+            if (!client.busy) {
+                const peer = {};
+                if (client.hasOwnProperty('id')) {
+                    peer.id = client.id;
+                }
+                if (client.hasOwnProperty('name')) {
+                    peer.name = client.name;
+                }
+                if (client.hasOwnProperty('user_agent')) {
+                    peer.user_agent = client.user_agent;
+                }
+                if (client.hasOwnProperty('session_id')) {
+                    peer.session_id = client.session_id;
+                }
+                peer.busy = client.busy || false;
+                peers.push(peer);
             }
-            if (client.hasOwnProperty('name')) {
-                peer.name = client.name;
-            }
-            if (client.hasOwnProperty('user_agent')) {
-                peer.user_agent = client.user_agent;
-            }
-            if (client.hasOwnProperty('session_id')) {
-                peer.session_id = client.session_id;
-            }
-            peer.busy = client.busy || false;
-            peers.push(peer);
         });
+        return peers
 
-        const msg = {
-            type: "peers",
-            data: peers,
-        };
-        console.log('update p=>' + JSON.stringify(msg));
-        let _send = this._send;
-        this.clients.forEach(function (client) {
-            _send(client, JSON.stringify(msg));
-        });
+        // let _send = this._send;
+        // this.clients.forEach(function (client) {
+        //     _send(client, JSON.stringify(msg));
+        // });
     };
 
     onClose = (client_self) => {
@@ -101,7 +99,7 @@ class CallHandler {
                 if (client.session_id === client_self.session_id) client.busy = false;
             _send(client, JSON.stringify(msg));
         });
-        this.updatePeers();
+        // this.updatePeers();
     };
 
     onConnection = (client_self) => {
@@ -126,7 +124,11 @@ class CallHandler {
                     client_self.id = "" + message.id;
                     client_self.name = message.name;
                     client_self.user_agent = message.user_agent;
-                    this.updatePeers();
+                    const msg = {
+                        type: "peers",
+                        data: this.getFreePeers(),
+                    };
+                    client_self.send(JSON.stringify(msg))
                 }
                     break;
                 case 'bye': {
@@ -250,7 +252,7 @@ class CallHandler {
                     break;
                 case 'keepalive':
                     console.log("sId=>" + client_self.id);
-                    _send(client_self, JSON.stringify({type: 'keepalive', data: {}}));
+                    _send(client_self, JSON.stringify({ type: 'keepalive', data: {} }));
                     break;
                 default:
                     console.log("Unhandled message: " + message.type);
