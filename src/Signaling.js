@@ -11,6 +11,8 @@ export default class Signaling extends events.EventEmitter {
         super();
         this.socket = null;
         this.peer_connections = {};
+        this.freePeerId = null;
+        this.oldPeerIds = [];
         this.session_id = '0-0';
         this.self_id = 0;
         this.url = url;
@@ -33,7 +35,6 @@ export default class Signaling extends events.EventEmitter {
                         var server = pcConfig.iceServers[i];
                         if (!server.hasOwnProperty('urls') &&
                             server.hasOwnProperty('url')) {
-                            // utils.deprecated('RTCIceServer.url', 'RTCIceServer.urls');
                             server = JSON.parse(JSON.stringify(server));
                             server.urls = server.url;
                             delete server.url;
@@ -168,6 +169,10 @@ export default class Signaling extends events.EventEmitter {
             session_id: this.session_id,
             from: this.self_id,
         }
+        const ids = this.session_id.split('-');
+        var oldId = ids[1];
+        if(oldId==this.self_id)oldId=ids[0]
+        this.oldPeerIds.push(oldId)
         this.send(message);
         this.msgNew()
     }
@@ -264,8 +269,18 @@ export default class Signaling extends events.EventEmitter {
 
     onPeers = (message) => {
         var data = message.data;
-        console.log("peers = " + JSON.stringify(data));
-        this.emit('peers', data, this.self_id);
+        this.freePeerId = this.getFreePeerId(data);
+        if (this.freePeerId != null) this.invite(this.freePeerId, "video")
+    }
+    getFreePeerId = (peers) => {
+        var i;
+        for (i in peers) {
+            const p = peers[i]
+            if (!p.busy && p.id != this.self_id && !this.oldPeerIds.includes(p.id)) {
+                return p.id;
+            }
+        }
+        return null;
     }
 
     onOffer = (message) => {
@@ -347,7 +362,6 @@ export default class Signaling extends events.EventEmitter {
         var data = message.data;
         var from = data.from;
         var to = data.to;
-        console.log('bye: ', data.session_id);
         var peerConnections = this.peer_connections;
         var pc = peerConnections[to] || peerConnections[from];
         if (pc !== undefined) {
@@ -359,6 +373,7 @@ export default class Signaling extends events.EventEmitter {
             this.closeMediaStream(this.local_stream);
             this.local_stream = null;
         }
+        this.oldPeerIds.push(this.session_id.split('-')[1])
         this.session_id = '0-0';
     };
 

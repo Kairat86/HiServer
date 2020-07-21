@@ -251,7 +251,6 @@ class CallHandler {
                 }
                     break;
                 case 'keepalive':
-                    console.log("sId=>" + client_self.id);
                     _send(client_self, JSON.stringify({ type: 'keepalive', data: {} }));
                     break;
                 default:

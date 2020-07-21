@@ -57,8 +57,6 @@ class App extends Component {
         this.selfView = null;
         this.remoteView = null;
         this.signaling = null;
-        this.freePeerId = null;
-        this.oldPeerIds = [];
         this.state = {
             self_id: null,
             open: false,
@@ -68,28 +66,12 @@ class App extends Component {
             video_muted: false,
         };
     }
-    getFreePeerId = (peers) => {
-        var i;
-        for (i in peers) {
-            const p = peers[i]
-            if (!p.busy && p.id != this.state.self_id && !this.oldPeerIds.includes(p.id)) {
-                return p.id;
-            }
-        }
-        console.log("no free and new peer")
-        return null;
-    }
+
     componentDidMount = () => {
         var url = 'wss://' + window.location.hostname + ':4443';
         this.signaling = new Signaling(url, "hi");
-        this.signaling.on('peers', (peers, self) => {
-            this.setState({ self_id: self });
-            this.freePeerId = this.getFreePeerId(peers);
-            if (this.freePeerId != null) this.signaling.invite(this.freePeerId, "video")
-        });
 
         this.signaling.on('new_call', (from, sessios) => {
-            console.log("new call")
             this.setState({ open: true });
         });
 
@@ -126,9 +108,8 @@ class App extends Component {
         this.signaling.invite(peer_id, type);
     };
 
-    handleBye = () => {
+    bye = () => {
         this.signaling.bye();
-        this.oldPeerIds.push(this.freePeerId)
     };
 
     /**
@@ -219,7 +200,7 @@ class App extends Component {
                                 }
                             </Button>
                             <Button variant="fab" color="secondary" aria-label="add" style={styles.btnTool}
-                                onClick={this.handleBye}>
+                                onClick={this.bye}>
                                 <SkipNextRoundedIcon />
                             </Button>
                         </div>
