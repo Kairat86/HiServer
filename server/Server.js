@@ -76,7 +76,6 @@ class CallHandler {
     };
 
     onClose = (client_self) => {
-        console.log('close id=>' + client_self.id);
         const session_id = client_self.session_id;
         //remove old session_id
         if (session_id !== undefined) {
@@ -99,7 +98,6 @@ class CallHandler {
                 if (client.session_id === client_self.session_id) client.busy = false;
             _send(client, JSON.stringify(msg));
         });
-        // this.updatePeers();
     };
 
     onConnection = (client_self) => {
@@ -124,6 +122,7 @@ class CallHandler {
                     client_self.id = "" + message.id;
                     client_self.name = message.name;
                     client_self.user_agent = message.user_agent;
+                    client_self.busy = false
                     const msg = {
                         type: "peers",
                         data: this.getFreePeers(),
@@ -162,6 +161,7 @@ class CallHandler {
                                     },
                                 };
                                 _send(client, JSON.stringify(msg));
+                                client.busy = false
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
                             }

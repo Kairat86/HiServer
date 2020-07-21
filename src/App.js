@@ -57,9 +57,9 @@ class App extends Component {
         this.selfView = null;
         this.remoteView = null;
         this.signaling = null;
-
+        this.freePeerId = null;
+        this.oldPeerIds = [];
         this.state = {
-            peers: [],
             self_id: null,
             open: false,
             localStream: null,
@@ -71,22 +71,21 @@ class App extends Component {
     getFreePeerId = (peers) => {
         var i;
         for (i in peers) {
-           const p = peers[i]
-            if (!p.busy && p.id != this.state.self_id) {
+            const p = peers[i]
+            if (!p.busy && p.id != this.state.self_id && !this.oldPeerIds.includes(p.id)) {
                 return p.id;
             }
         }
-        console.log("no free peer")
+        console.log("no free and new peer")
         return null;
     }
     componentDidMount = () => {
         var url = 'wss://' + window.location.hostname + ':4443';
         this.signaling = new Signaling(url, "hi");
         this.signaling.on('peers', (peers, self) => {
-            this.setState({ peers, self_id: self });
-            const id = this.getFreePeerId(peers);
-            console.log(`id to call ${id}`)
-           if(id!=null) this.signaling.invite(id, "video")
+            this.setState({ self_id: self });
+            this.freePeerId = this.getFreePeerId(peers);
+            if (this.freePeerId != null) this.signaling.invite(this.freePeerId, "video")
         });
 
         this.signaling.on('new_call', (from, sessios) => {
@@ -129,6 +128,7 @@ class App extends Component {
 
     handleBye = () => {
         this.signaling.bye();
+        this.oldPeerIds.push(this.freePeerId)
     };
 
     /**
@@ -180,7 +180,7 @@ class App extends Component {
             <MuiThemeProvider theme={theme}>
                 <div className={classes.root}>
                     <CircularProgress />
-                    <h5 style={{ marginLeft: '-35%' }}>Waiting for an interlocutor...</h5>
+                    <h5 style={{ marginLeft: '-35%' }}>Waiting for someone...</h5>
                     <Dialog
                         fullScreen
                         open={this.state.open}

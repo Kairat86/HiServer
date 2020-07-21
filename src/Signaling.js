@@ -25,7 +25,7 @@ export default class Signaling extends events.EventEmitter {
 
         if (browser.safari) {
             var OrigPeerConnection = RTCPeerConnection;
-            
+
             RTCPeerConnection = function (pcConfig, pcConstraints) {
                 if (pcConfig && pcConfig.iceServers) {
                     var newIceServers = [];
@@ -57,13 +57,7 @@ export default class Signaling extends events.EventEmitter {
         this.socket.onopen = () => {
             console.log("wss connect success...");
             this.self_id = this.getRandomUserId();
-            let message = {
-                type: 'new',
-                user_agent: browser.name + '/' + browser.version,
-                name: this.name,
-                id: this.self_id,
-            };
-            this.send(message);
+            this.msgNew();
             this.wsKeepaliveTimeoutId = setInterval(this.keepAlive, 12000);
         };
 
@@ -94,6 +88,7 @@ export default class Signaling extends events.EventEmitter {
                     break;
                 case 'leave':
                     this.onLeave(parsedMessage);
+                    this.msgNew()
                     break;
                 case 'bye':
                     this.onBye(parsedMessage);
@@ -135,7 +130,16 @@ export default class Signaling extends events.EventEmitter {
         });
     }
 
-    // 获取6位随机id
+    msgNew() {
+        let message = {
+            type: 'new',
+            user_agent: browser.name + '/' + browser.version,
+            name: this.name,
+            id: this.self_id,
+        };
+        this.send(message);
+    }
+
     getRandomUserId() {
         var num = "";
         for (var i = 0; i < 6; i++) {
@@ -165,6 +169,7 @@ export default class Signaling extends events.EventEmitter {
             from: this.self_id,
         }
         this.send(message);
+        this.msgNew()
     }
 
     createOffer = (pc, id, media) => {
@@ -188,7 +193,6 @@ export default class Signaling extends events.EventEmitter {
         var pc = new RTCPeerConnection(configuration);
         this.peer_connections["" + id] = pc;
         pc.onicecandidate = (event) => {
-            console.log('onicecandidate', event);
             if (event.candidate) {
                 let message = {
                     type: 'candidate',
@@ -267,7 +271,6 @@ export default class Signaling extends events.EventEmitter {
     onOffer = (message) => {
         var data = message.data;
         var from = data.from;
-        console.log("data:" + data);
         var media = data.media;
         this.session_id = data.session_id;
         this.emit('new_call', from, this.session_id);
@@ -278,7 +281,6 @@ export default class Signaling extends events.EventEmitter {
             var pc = this.createPeerConnection(from, media, false, stream);
 
             if (pc && data.description) {
-                //console.log('on offer sdp', data);
                 pc.setRemoteDescription(new RTCSessionDescription(data.description), () => {
                     if (pc.remoteDescription.type == "offer")
                         pc.createAnswer((desc) => {
