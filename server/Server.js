@@ -46,6 +46,7 @@ class CallHandler {
     }
 
     getFreePeers = () => {
+        console.log('get free peers');
         const peers = [];
 
         this.clients.forEach(function (client) {
@@ -67,6 +68,7 @@ class CallHandler {
                 peers.push(peer);
             }
         });
+        console.log('return free peers');
         return peers
 
         // let _send = this._send;

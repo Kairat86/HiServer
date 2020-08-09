@@ -13,6 +13,7 @@ export default class Signaling extends events.EventEmitter {
         this.peer_connections = {};
         this.freePeerId = null;
         this.oldPeerIds = [];
+        this.iAmBusy=false
         this.session_id = '0-0';
         this.self_id = 0;
         this.url = url;
@@ -174,6 +175,7 @@ export default class Signaling extends events.EventEmitter {
         if(oldId==this.self_id)oldId=ids[0]
         this.oldPeerIds.push(oldId)
         this.send(message);
+        this.iAmBusy=false
         this.msgNew()
     }
 
@@ -284,6 +286,7 @@ export default class Signaling extends events.EventEmitter {
     }
 
     onOffer = (message) => {
+        if(this.iAmBusy)return
         var data = message.data;
         var from = data.from;
         var media = data.media;
@@ -309,6 +312,7 @@ export default class Signaling extends events.EventEmitter {
                                     session_id: this.session_id,
                                 }
                                 this.send(message);
+                                this.iAmBusy=true
                             }, this.logError);
                         }, this.logError);
                 }, this.logError);
@@ -375,6 +379,7 @@ export default class Signaling extends events.EventEmitter {
         }
         this.oldPeerIds.push(this.session_id.split('-')[1])
         this.session_id = '0-0';
+        this.iAmBusy=false
     };
 
     logError = (error) => {
