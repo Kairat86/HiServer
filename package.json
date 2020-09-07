@@ -38,6 +38,7 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-favicon": "0.0.17",
+    "serialize-javascript": "^4.0.0",
     "websocket-extensions": "^0.1.4",
     "ws": "^5.2.1"
   },
