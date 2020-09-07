@@ -144,7 +144,7 @@ class App extends Component {
 
 
     onToggleLocalAudioTrack = (muted) => {
-        const audioTracks = this.state.localStream.getAudioTracks();
+        const audioTracks = this.state.remoteStream.getAudioTracks();
         if (audioTracks.length === 0) {
             console.log("No local audio available.");
             return;
