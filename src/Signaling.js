@@ -279,14 +279,17 @@ export default class Signaling extends events.EventEmitter {
         for (i in peers) {
             const p = peers[i]
             if (!p.busy && p.id != this.self_id && !this.oldPeerIds.includes(p.id)) {
-                return p.id;
+                return p.id
             }
         }
         return null;
     }
 
     onOffer = (message) => {
-        if(this.iAmBusy)return
+        if(this.iAmBusy){
+            this.bye()
+            return
+        }
         var data = message.data;
         var from = data.from;
         var media = data.media;
