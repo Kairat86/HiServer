@@ -42,7 +42,8 @@
     "websocket-extensions": "^0.1.4",
     "ws": "^5.2.1",
     "yargs-parser": "^19.0.4",
-    "node-fetch": ">=2.6.1"
+    "node-fetch": ">=2.6.1",
+    "node-forge": ">=0.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

@@ -109,6 +109,7 @@ class App extends Component {
     };
 
     bye = () => {
+        console.log('bye')
         this.signaling.bye();
     };
 

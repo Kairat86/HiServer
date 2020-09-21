@@ -13,7 +13,6 @@ export default class Signaling extends events.EventEmitter {
         this.peer_connections = {};
         this.freePeerId = null;
         this.oldPeerIds = [];
-        this.iAmBusy=false
         this.session_id = '0-0';
         this.self_id = 0;
         this.url = url;
@@ -133,6 +132,7 @@ export default class Signaling extends events.EventEmitter {
     }
 
     msgNew() {
+        console.log("msg new")
         let message = {
             type: 'new',
             user_agent: browser.name + '/' + browser.version,
@@ -170,13 +170,7 @@ export default class Signaling extends events.EventEmitter {
             session_id: this.session_id,
             from: this.self_id,
         }
-        const ids = this.session_id.split('-');
-        var oldId = ids[1];
-        if(oldId==this.self_id)oldId=ids[0]
-        this.oldPeerIds.push(oldId)
         this.send(message);
-        this.iAmBusy=false
-        this.msgNew()
     }
 
     createOffer = (pc, id, media) => {
@@ -286,10 +280,6 @@ export default class Signaling extends events.EventEmitter {
     }
 
     onOffer = (message) => {
-        if(this.iAmBusy){
-            this.bye()
-            return
-        }
         var data = message.data;
         var from = data.from;
         var media = data.media;
@@ -315,7 +305,6 @@ export default class Signaling extends events.EventEmitter {
                                     session_id: this.session_id,
                                 }
                                 this.send(message);
-                                this.iAmBusy=true
                             }, this.logError);
                         }, this.logError);
                 }, this.logError);
@@ -366,6 +355,7 @@ export default class Signaling extends events.EventEmitter {
     };
 
     onBye = (message) => {
+        console.log('on bye')
         var data = message.data;
         var from = data.from;
         var to = data.to;
@@ -380,9 +370,12 @@ export default class Signaling extends events.EventEmitter {
             this.closeMediaStream(this.local_stream);
             this.local_stream = null;
         }
-        this.oldPeerIds.push(this.session_id.split('-')[1])
+        const ids = this.session_id.split('-');
+        var oldId = ids[1];
+        if(oldId==this.self_id)oldId=ids[0]
+        this.oldPeerIds.push(oldId)
         this.session_id = '0-0';
-        this.iAmBusy=false
+        this.msgNew()
     };
 
     logError = (error) => {
