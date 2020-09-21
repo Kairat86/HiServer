@@ -223,6 +223,8 @@ class CallHandler {
                     this.clients.forEach(function (client) {
                         if (client.id === "" + message.to && client.session_id === message.session_id) {
                             try {
+                                client.busy=true
+                                client_self.busy=true
                                 _send(client, JSON.stringify(msg));
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
