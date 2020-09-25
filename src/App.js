@@ -20,6 +20,7 @@ import RemoteVideoView from './RemoteVideoView';
 import css from './layout.css';
 import Signaling from './Signaling';
 import CircularProgress from "@material-ui/core/CircularProgress";
+import browser from 'bowser';
 
 const theme = createMuiTheme({
     palette: {
@@ -69,7 +70,7 @@ class App extends Component {
 
     componentDidMount = () => {
         var url = 'wss://' + window.location.hostname + ':4443';
-        this.signaling = new Signaling(url, "hi");
+        this.signaling = new Signaling(url, "hi", browser.name + '/' + browser.version);
 
         this.signaling.on('new_call', (from, sessios) => {
             this.setState({ open: true });

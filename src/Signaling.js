@@ -7,7 +7,7 @@ var configuration;
 
 export default class Signaling extends events.EventEmitter {
 
-    constructor(url, name) {
+    constructor(url, name,user_agent) {
         super();
         this.socket = null;
         this.peer_connections = {};
@@ -17,6 +17,7 @@ export default class Signaling extends events.EventEmitter {
         this.self_id = 0;
         this.url = url;
         this.name = name;
+        this.user_agent=user_agent
         this.local_stream;
         this.keepalive_cnt = 0;
 
@@ -84,8 +85,8 @@ export default class Signaling extends events.EventEmitter {
                 case 'candidate':
                     this.onCandidate(parsedMessage);
                     break;
-                case 'peers':
-                    this.onPeers(parsedMessage);
+                case 'peer':
+                    this.onPeer(parsedMessage);
                     break;
                 case 'leave':
                     this.onLeave(parsedMessage);
@@ -135,9 +136,10 @@ export default class Signaling extends events.EventEmitter {
         console.log("msg new")
         let message = {
             type: 'new',
-            user_agent: browser.name + '/' + browser.version,
+            user_agent: this.user_agent,
             name: this.name,
             id: this.self_id,
+            oldPeerIds:this.oldPeerIds
         };
         this.send(message);
     }
@@ -263,20 +265,9 @@ export default class Signaling extends events.EventEmitter {
         pc.textDataChannel = dataChannel;
     }
 
-    onPeers = (message) => {
+    onPeer = (message) => {
         var data = message.data;
-        this.freePeerId = this.getFreePeerId(data);
-        if (this.freePeerId != null) this.invite(this.freePeerId, "video")
-    }
-    getFreePeerId = (peers) => {
-        var i;
-        for (i in peers) {
-            const p = peers[i]
-            if (!p.busy && p.id != this.self_id && !this.oldPeerIds.includes(p.id)) {
-                return p.id
-            }
-        }
-        return null;
+        this.invite(data.id, "video")
     }
 
     onOffer = (message) => {

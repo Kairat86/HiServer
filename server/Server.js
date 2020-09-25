@@ -45,13 +45,13 @@ class CallHandler {
         this.wss.on('connection', this.onConnection);
     }
 
-    getFreePeers = () => {
-        console.log('get free peers');
-        const peers = [];
-
-        this.clients.forEach(function (client) {
-            if (!client.busy) {
-                const peer = {};
+      getFreePeer = (client_self, oldPeersIds) => {
+        console.log('get free peers from '+this.clients.size);
+        for(const client of this.clients) {
+            const same = client === client_self;
+            console.log(`id=${client.id}, busy=${client.busy}, same=${same}`)
+            const peer = {};
+            if (!client.busy && !same && !oldPeersIds.includes(client.id)) {
                 if (client.hasOwnProperty('id')) {
                     peer.id = client.id;
                 }
@@ -64,17 +64,13 @@ class CallHandler {
                 if (client.hasOwnProperty('session_id')) {
                     peer.session_id = client.session_id;
                 }
-                peer.busy = client.busy || false;
-                peers.push(peer);
+                client.busy=true
+                console.log("peer to return=>"+peer)
+                return peer
             }
-        });
-        console.log('return free peers');
-        return peers
-
-        // let _send = this._send;
-        // this.clients.forEach(function (client) {
-        //     _send(client, JSON.stringify(msg));
-        // });
+        }
+        console.log("no free peer")
+        return null
     };
 
     onClose = (client_self) => {
@@ -95,10 +91,12 @@ class CallHandler {
         };
 
         let _send = this._send;
+        console.log("sess id=>"+session_id)
         this.clients.forEach(function (client) {
-            if (client !== client_self)
-                if (client.session_id === client_self.session_id) client.busy = false;
+            if (session_id!==undefined && client !== client_self && client.session_id === session_id){ 
+             client.busy = false;
             _send(client, JSON.stringify(msg));
+            }
         });
     };
 
@@ -120,14 +118,16 @@ class CallHandler {
             }
 
             switch (message.type) {
-                case 'new': {
+                case 'new': { 
                     client_self.id = "" + message.id;
                     client_self.name = message.name;
                     client_self.user_agent = message.user_agent;
                     client_self.busy = false
+                    const p = this.getFreePeer(client_self, message.oldPeerIds);
+                    if (p==null)return
                     const msg = {
-                        type: "peers",
-                        data: this.getFreePeers(),
+                        type: "peer",
+                        data: p,
                     };
                     client_self.send(JSON.stringify(msg))
                 }
@@ -223,8 +223,6 @@ class CallHandler {
                     this.clients.forEach(function (client) {
                         if (client.id === "" + message.to && client.session_id === message.session_id) {
                             try {
-                                client.busy=true
-                                client_self.busy=true
                                 _send(client, JSON.stringify(msg));
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
