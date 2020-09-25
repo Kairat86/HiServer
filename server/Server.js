@@ -65,11 +65,9 @@ class CallHandler {
                     peer.session_id = client.session_id;
                 }
                 client.busy=true
-                console.log("peer to return=>"+peer)
                 return peer
             }
         }
-        console.log("no free peer")
         return null
     };
 
