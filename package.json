@@ -1,8 +1,4 @@
 {
-  "name": "flutter-webrtc-web",
-  "version": "1.0.0",
-  "description": "webapp",
-  "main": "index.js",
   "scripts": {
     "start": "npm-run-all --parallel run-server run-webpack-dev-server",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,20 +6,6 @@
     "run-webpack-dev-server": "webpack-dev-server --mode development --https --cert ./certs/cert.pem --key ./certs/key.pem --hot --inline --progress --colors --watch --compress --content-base ./dist  --port 8086 --host 0.0.0.0 --open",
     "build": "webpack --mode production --progress --colors --config ./webpack.config.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Kairat86/HiServer.git"
-  },
-  "keywords": [
-    "flutter",
-    "webrtc"
-  ],
-  "author": "duanweiwei1982@gmail.com",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cloudwebrtc/flutter-webrtc-server/issues"
-  },
-  "homepage": "https://github.com/cloudwebrtc/flutter-webrtc-server#readme",
   "dependencies": {
     "@material-ui/core": "^4.9.4",
     "@material-ui/icons": "^4.9.1",
