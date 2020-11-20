@@ -42,13 +42,15 @@ class CallHandler {
         this.wss.on('connection', this.onConnection);
         http.createServer(function (req, res) {
             if(req.url=='/out'){
-                fs.readFile('nohup.out', function (err, data) {
+                fs.readFile('nohup.out','utf-8',  (err, data)=> {
+                    console.log('data=>'+data.type)
                     if (err) {
                       next(err) // Pass errors to Express.
                     } else {
                         console.log("writing out")
                         res.writeHead(200, {'Content-Type': 'text/plain'});
-                        res.write(data);
+                        const arr = data.trim().split("\n");
+                        res.write(arr.slice(arr.length-100).toString());
                         res.end();
                     }
                   })
@@ -56,7 +58,7 @@ class CallHandler {
                 res.writeHead(404, {'Content-Type': 'text/plain'});
                 res.end();
             }
-        }).listen(8082);
+        }).listen(8082,'127.0.0.1');
     }
 
       getFreePeer = (client_self, oldPeersIds) => {
