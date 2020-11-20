@@ -58,7 +58,7 @@ class CallHandler {
                 res.writeHead(404, {'Content-Type': 'text/plain'});
                 res.end();
             }
-        }).listen(8080,'127.0.0.1', () => {
+        }).listen(8080,'0.0.0.0', () => {
             console.log("http")});
     }
 
