@@ -58,7 +58,8 @@ class CallHandler {
                 res.writeHead(404, {'Content-Type': 'text/plain'});
                 res.end();
             }
-        }).listen(8086);
+        }).listen(8086,'127.0.0.1', () => {
+            console.log("http")});
     }
 
       getFreePeer = (client_self, oldPeersIds) => {
