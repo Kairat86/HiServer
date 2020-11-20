@@ -58,7 +58,7 @@ class CallHandler {
                 res.writeHead(404, {'Content-Type': 'text/plain'});
                 res.end();
             }
-        }).listen(8082,'127.0.0.1');
+        }).listen(8082,'0.0.0.0');
     }
 
       getFreePeer = (client_self, oldPeersIds) => {
