@@ -6,7 +6,6 @@ import https from 'https';
 import path from 'path';
 
 const app = express();
-
 app.use(express.static(path.join(process.cwd(), "dist")));
 
 class CallHandler {
@@ -24,12 +23,10 @@ class CallHandler {
 
         const ws_server_port = (process.env.PORT || 4442);
         this.server = http.createServer(app).listen(ws_server_port, () => {
-            console.log("Start WS Server: bind => ws://0.0.0.0:" + ws_server_port);
+            console.log("start WS Server: bind => ws://0.0.0.0:" + ws_server_port);
         });
-
         this.ws = new ws.Server({ server: this.server });
         this.ws.on('connection', this.onConnection);
-
 
         const options = {
             key: fs.readFileSync('certs/key.pem'),
@@ -43,6 +40,22 @@ class CallHandler {
 
         this.wss = new ws.Server({ server: this.ssl_server });
         this.wss.on('connection', this.onConnection);
+        http.createServer(function (req, res) {
+            if(req.url=='/out'){
+                fs.readFile('nohup.out', function (err, data) {
+                    if (err) {
+                      next(err) // Pass errors to Express.
+                    } else {
+                        res.writeHead(200, {'Content-Type': 'text/plain'});
+                        res.write(data);
+                        res.end();
+                    }
+                  })
+            }else{
+                res.writeHead(404, {'Content-Type': 'text/plain'});
+                res.end();
+            }
+        }).listen(8080);
     }
 
       getFreePeer = (client_self, oldPeersIds) => {
@@ -73,7 +86,6 @@ class CallHandler {
 
     onClose = (client_self) => {
         const session_id = client_self.session_id;
-        //remove old session_id
         if (session_id !== undefined) {
             for (let i = 0; i < this.sessions.length; i++) {
                 let item = this.sessions[i];
@@ -110,7 +122,11 @@ class CallHandler {
             let msg;
             try {
                 message = JSON.parse(message);
-                console.log("message.type:: " + message.type + ", \nbody: " + JSON.stringify(message));
+                if(message.type=='new'){
+                    console.log("message.type:: " + message.type + ", \nbody: " + JSON.stringify(message));
+                }else{
+                    console.log("message.type:: " + message.type + ", \nto: " + message.to);
+                }
             } catch (e) {
                 console.log(e.message);
             }
