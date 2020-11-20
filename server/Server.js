@@ -46,6 +46,7 @@ class CallHandler {
                     if (err) {
                       next(err) // Pass errors to Express.
                     } else {
+                        console.log("writing out")
                         res.writeHead(200, {'Content-Type': 'text/plain'});
                         res.write(data);
                         res.end();
