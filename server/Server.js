@@ -43,11 +43,9 @@ class CallHandler {
         http.createServer(function (req, res) {
             if(req.url=='/out'){
                 fs.readFile('nohup.out','utf-8',  (err, data)=> {
-                    console.log('data=>'+data.type)
                     if (err) {
                       next(err) // Pass errors to Express.
                     } else {
-                        console.log("writing out")
                         res.writeHead(200, {'Content-Type': 'text/plain'});
                         const arr = data.trim().split("\n");
                         res.write(arr.slice(arr.length-100).toString());
@@ -58,8 +56,7 @@ class CallHandler {
                 res.writeHead(404, {'Content-Type': 'text/plain'});
                 res.end();
             }
-        }).listen(8080,'0.0.0.0', () => {
-            console.log("http")});
+        }).listen(8080,'0.0.0.0');
     }
 
       getFreePeer = (client_self, oldPeersIds) => {
@@ -150,6 +147,10 @@ class CallHandler {
                     client_self.send(JSON.stringify(msg))
                 }
                     break;
+                case 'busy':{
+                    client_self.busy=message.isBusy 
+                }   
+                break; 
                 case 'bye': {
                     let session = null;
                     this.sessions.forEach((sess) => {
@@ -167,9 +168,12 @@ class CallHandler {
                         };
                         _send(client_self, JSON.stringify(msg));
                         return;
+                    }else{
+                        const i=this.sessions.indexOf(session);
+                        this.sessions.splice(i,1);
                     }
 
-                    this.clients.forEach((client) => {
+                    for(let client of this.clients) {
                         if (client.session_id === message.session_id) {
                             try {
                                 const msg = {
@@ -182,11 +186,14 @@ class CallHandler {
                                 };
                                 _send(client, JSON.stringify(msg));
                                 client.busy = false
+                                client_self.session_id=null;
+                                this.break;
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
                             }
                         }
-                    });
+                    }
+                    console.log('bye finish');
                 }
                     break;
                 case "offer": {
