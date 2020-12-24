@@ -47,7 +47,7 @@ class CallHandler {
                       next(err) // Pass errors to Express.
                     } else {
                         res.writeHead(200, {'Content-Type': 'text/plain'});
-                        const arr = data.trim().split("\n");
+                        const arr = data.trim().split(/(?<=\n)/g);
                         res.write(arr.slice(arr.length-100).toString());
                         res.end();
                     }
@@ -147,10 +147,6 @@ class CallHandler {
                     client_self.send(JSON.stringify(msg))
                 }
                     break;
-                case 'busy':{
-                    client_self.busy=message.isBusy 
-                }   
-                break; 
                 case 'bye': {
                     let session = null;
                     this.sessions.forEach((sess) => {
@@ -158,7 +154,7 @@ class CallHandler {
                             session = sess;
                         }
                     });
-
+                    console.log('found sees=>'+session);    
                     if (!session) {
                         msg = {
                             type: "error",
@@ -166,34 +162,34 @@ class CallHandler {
                                 error: "Invalid session " + message.session_id,
                             },
                         };
+                        client_self.busy=message.is_busy
                         _send(client_self, JSON.stringify(msg));
                         return;
                     }else{
                         const i=this.sessions.indexOf(session);
                         this.sessions.splice(i,1);
                     }
-
+                    var count=0;
                     for(let client of this.clients) {
                         if (client.session_id === message.session_id) {
                             try {
+                                const to = (client.id === session.from ? session.to : session.from);
                                 const msg = {
                                     type: "bye",
                                     data: {
                                         session_id: message.session_id,
-                                        from: message.from,
-                                        to: (client.id === session.from ? session.to : session.from),
+                                        to: to,
                                     },
                                 };
                                 _send(client, JSON.stringify(msg));
-                                client.busy = false
+                                client.busy = message.is_busy
                                 client_self.session_id=null;
-                                this.break;
+                                if(++count==2)this.break;
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
                             }
                         }
                     }
-                    console.log('bye finish');
                 }
                     break;
                 case "offer": {
