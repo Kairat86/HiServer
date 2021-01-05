@@ -169,22 +169,17 @@ class CallHandler {
                         const i=this.sessions.indexOf(session);
                         this.sessions.splice(i,1);
                     }
-                    var count=0;
+                    console.log('sess id=>'+message.session_id);
+                    client_self.busy=message.is_busy
+                    _send(client_self,JSON.stringify(this.bye(message,session.to)));
                     for(let client of this.clients) {
-                        if (client.session_id === message.session_id) {
+                        console.log('c sees id=>'+client.session_id);
+                        if (client.session_id === message.session_id && client!==client_self) {
                             try {
-                                const to = (client.id === session.from ? session.to : session.from);
-                                const msg = {
-                                    type: "bye",
-                                    data: {
-                                        session_id: message.session_id,
-                                        to: to,
-                                    },
-                                };
+                                const msg = this.bye(message, session.from);
                                 _send(client, JSON.stringify(msg));
-                                client.busy = message.is_busy
-                                client_self.session_id=null;
-                                if(++count==2)this.break;
+                                console.log('sent bye');
+                                break;
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
                             }
@@ -222,12 +217,7 @@ class CallHandler {
                         };
                         this.sessions.push(session);
                         client_self.busy = true;
-                        for (const c of this.clients) {
-                            if (c.id === peer.id) {
-                                c.busy = true;
-                                break
-                            }
-                        }
+                        peer.busy=true;
                     }
                     break;
                 }
@@ -288,6 +278,16 @@ class CallHandler {
         } catch (e) {
             console.log("Send failure !: " + e);
         }
+    }
+
+    bye(message, to) {
+        return {
+            type: "bye",
+            data: {
+                session_id: message.session_id,
+                to: to,
+            },
+        };
     }
 }
 
