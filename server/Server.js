@@ -87,6 +87,7 @@ class CallHandler {
 
     onClose = (client_self) => {
         const session_id = client_self.session_id;
+        console.log('on close sees id=>'+session_id)
         if (session_id !== undefined) {
             for (let i = 0; i < this.sessions.length; i++) {
                 let item = this.sessions[i];
@@ -95,20 +96,19 @@ class CallHandler {
                     break;
                 }
             }
+        }else{
+            return
         }
-        const msg = {
-            type: "leave",
-            data: client_self.id,
-        };
 
         let _send = this._send;
         console.log("sess id=>"+session_id)
-        this.clients.forEach(function (client) {
-            if (session_id!==undefined && client !== client_self && client.session_id === session_id){ 
+        for(let client of this.clients) {
+            if (session_id!==undefined && client.session_id === session_id){ 
              client.busy = false;
-            _send(client, JSON.stringify(msg));
+            _send(client, JSON.stringify(this.bye(session_id,client_self.id)));
+            break;
             }
-        });
+        }
     };
 
     onConnection = (client_self) => {
@@ -117,6 +117,7 @@ class CallHandler {
         client_self.on("close", (data) => {
             this.clients.delete(client_self);
             this.onClose(client_self)
+            console.log('on close id=>'+client_self.id)
         });
 
         client_self.on("message", message => {
@@ -148,13 +149,13 @@ class CallHandler {
                 }
                     break;
                 case 'bye': {
+                    console.log('bye')
                     let session = null;
                     this.sessions.forEach((sess) => {
                         if (sess.id === message.session_id) {
                             session = sess;
                         }
                     });
-                    console.log('found sees=>'+session);    
                     if (!session) {
                         msg = {
                             type: "error",
@@ -169,16 +170,15 @@ class CallHandler {
                         const i=this.sessions.indexOf(session);
                         this.sessions.splice(i,1);
                     }
-                    console.log('sess id=>'+message.session_id);
                     client_self.busy=message.is_busy
-                    _send(client_self,JSON.stringify(this.bye(message,session.to)));
+                    client_self.session_id=null;
+                    _send(client_self,JSON.stringify(this.bye(message.session_id,session.to)));
                     for(let client of this.clients) {
-                        console.log('c sees id=>'+client.session_id);
                         if (client.session_id === message.session_id && client!==client_self) {
                             try {
-                                const msg = this.bye(message, session.from);
+                                const msg = this.bye(message.session_id, session.from);
                                 _send(client, JSON.stringify(msg));
-                                console.log('sent bye');
+                                client.session_id=null;
                                 break;
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
@@ -280,11 +280,11 @@ class CallHandler {
         }
     }
 
-    bye(message, to) {
+    bye(session_id, to) {
         return {
             type: "bye",
             data: {
-                session_id: message.session_id,
+                session_id: session_id,
                 to: to,
             },
         };
