@@ -9,7 +9,7 @@ const app = express();
 app.use(express.static(path.join(process.cwd(), "dist")));
 
 class CallHandler {
-
+//test git
     constructor() {
         this.wss = null;
         this.ws = null;
@@ -48,7 +48,7 @@ class CallHandler {
                     } else {
                         res.writeHead(200, {'Content-Type': 'text/plain'});
                         const arr = data.trim().split(/(?<=\n)/g);
-                        res.write(arr.slice(arr.length-100).toString());
+                        res.write(arr.slice(arr.length-110).toString());
                         res.end();
                     }
                   })
@@ -134,7 +134,7 @@ class CallHandler {
             }
 
             switch (message.type) {
-                case 'new': { 
+                case 'new': {  
                     client_self.id = "" + message.id;
                     client_self.name = message.name;
                     client_self.user_agent = message.user_agent;

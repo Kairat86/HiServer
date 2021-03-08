@@ -49,9 +49,6 @@ export default class Signaling extends events.EventEmitter {
                 return new OrigPeerConnection(pcConfig, pcConstraints);
             };
         }
-        var twilioIceServers = [
-            { url: 'stun:global.stun.twilio.com:3478?transport=udp' }
-        ];
 
         configuration = { "iceServers": [{ "url": "stun:stun.l.google.com:19302" }] };
 
