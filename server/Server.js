@@ -72,11 +72,11 @@ class CallHandler {
                 if (client.hasOwnProperty('name')) {
                     peer.name = client.name;
                 }
-                if (client.hasOwnProperty('user_agent')) {
-                    peer.user_agent = client.user_agent;
-                }
                 if (client.hasOwnProperty('session_id')) {
                     peer.session_id = client.session_id;
+                }
+                if (client.hasOwnProperty('mc')) {
+                    peer.mc = client.mc;
                 }
                 client.busy=true
                 return peer
@@ -139,6 +139,7 @@ class CallHandler {
                     client_self.name = message.name;
                     client_self.user_agent = message.user_agent;
                     client_self.busy = false
+                    client_self.mc=message.mc;
                     const p = this.getFreePeer(client_self, message.oldPeerIds);
                     if (p==null)return
                     const msg = {
@@ -204,6 +205,7 @@ class CallHandler {
                                 media: message.media,
                                 session_id: message.session_id,
                                 description: message.description,
+                                mc:message.mc
                             }
                         };
                         _send(peer, JSON.stringify(msg));
