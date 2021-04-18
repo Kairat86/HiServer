@@ -101,7 +101,6 @@ class CallHandler {
         }
 
         let _send = this._send;
-        console.log("sess id=>"+session_id)
         for(let client of this.clients) {
             if (session_id!==undefined && client.session_id === session_id){ 
              client.busy = false;
@@ -165,7 +164,6 @@ class CallHandler {
                             },
                         };
                         client_self.busy=message.is_busy
-                        _send(client_self, JSON.stringify(msg));
                         return;
                     }else{
                         const i=this.sessions.indexOf(session);
