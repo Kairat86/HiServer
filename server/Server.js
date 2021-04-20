@@ -164,6 +164,7 @@ class CallHandler {
                             },
                         };
                         client_self.busy=message.is_busy
+                        console.log('sess is null set client to busy=>'+message.is_busy);
                         return;
                     }else{
                         const i=this.sessions.indexOf(session);
