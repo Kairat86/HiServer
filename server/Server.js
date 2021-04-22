@@ -9,7 +9,6 @@ const app = express();
 app.use(express.static(path.join(process.cwd(), "dist")));
 
 class CallHandler {
-//test git
     constructor() {
         this.wss = null;
         this.ws = null;
@@ -48,7 +47,7 @@ class CallHandler {
                     } else {
                         res.writeHead(200, {'Content-Type': 'text/plain'});
                         const arr = data.trim().split(/(?<=\n)/g);
-                        res.write(arr.slice(arr.length-110).toString());
+                        res.write(arr.slice(arr.length-120).toString());
                         res.end();
                     }
                   })
@@ -164,7 +163,7 @@ class CallHandler {
                             },
                         };
                         client_self.busy=message.is_busy
-                        console.log('sess is null set client to busy=>'+message.is_busy);
+                        console.log('sess is null set client '+client_self.id+' to busy=>'+message.is_busy);
                         return;
                     }else{
                         const i=this.sessions.indexOf(session);

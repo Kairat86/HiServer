@@ -176,7 +176,6 @@ export default class Signaling extends events.EventEmitter {
         pc.createOffer((desc) => {
             console.log('createOffer: ', desc.sdp);
             pc.setLocalDescription(desc, () => {
-                console.log('setLocalDescription', pc.localDescription);
                 let message = {
                     type: 'offer',
                     to: id,
@@ -215,7 +214,6 @@ export default class Signaling extends events.EventEmitter {
             }
         };
         pc.onsignalingstatechange = (event) => {
-            console.log('onsignalingstatechange', event);
         };
 
         pc.onaddstream = (event) => {
