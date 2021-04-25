@@ -306,7 +306,6 @@ export default class Signaling extends events.EventEmitter {
             pc = this.peer_connections[from];
         }
         if (pc && data.description) {
-            //console.log('on answer sdp', data);
             pc.setRemoteDescription(new RTCSessionDescription(data.description), () => {
             }, this.logError);
         }

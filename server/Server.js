@@ -122,7 +122,10 @@ class CallHandler {
                     break;
                 case 'bye': {
                     client_self.busy=message.is_busy
-                    if(message.to==null)return;
+                    if(message.to==undefined || message.to==null){
+                        console.log('message.to is '+message.to+', returning')
+                        return;
+                    }
                     _send(client_self,JSON.stringify(this.bye()));
                     for(let client of this.clients) {
                         if (client.id==message.to) {
