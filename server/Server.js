@@ -98,7 +98,7 @@ class CallHandler {
                 if(message.type=='new'){
                     console.log(JSON.stringify(message));
                 }else{
-                    console.log("message.type: " + message.type + "; to: " + message.to);
+                    console.log("message.type: " + message.type + "; from"+client_self.id+" to: " + message.to);
                 }
             } catch (e) {
                 console.log(e.message);
