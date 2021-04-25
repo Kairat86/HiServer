@@ -15,7 +15,6 @@ class CallHandler {
         this.clients = new Set();
         this.server = null;
         this.ssl_server = null;
-        this.sessions = [];
     }
 
     init() {
@@ -47,7 +46,7 @@ class CallHandler {
                     } else {
                         res.writeHead(200, {'Content-Type': 'text/plain'});
                         const arr = data.trim().split(/(?<=\n)/g);
-                        res.write(arr.slice(arr.length-120).toString());
+                        res.write(arr.slice(arr.length-130).toString());
                         res.end();
                     }
                   })
@@ -59,9 +58,9 @@ class CallHandler {
     }
 
       getFreePeer = (client_self, oldPeersIds) => {
-        console.log('get free peers from '+this.clients.size);
+        console.log('get free peer from '+this.clients.size);
         for(const client of this.clients) {
-            const same = client === client_self;
+            const same = (client === client_self || client.id==client_self.id);
             console.log(`id=${client.id}, busy=${client.busy}, same=${same}`)
             const peer = {};
             if (!client.busy && !same && !oldPeersIds.includes(client.id)) {
@@ -84,37 +83,11 @@ class CallHandler {
         return null
     };
 
-    onClose = (client_self) => {
-        const session_id = client_self.session_id;
-        console.log('on close sees id=>'+session_id)
-        if (session_id !== undefined) {
-            for (let i = 0; i < this.sessions.length; i++) {
-                let item = this.sessions[i];
-                if (item.id === session_id) {
-                    this.sessions.splice(i, 1);
-                    break;
-                }
-            }
-        }else{
-            return
-        }
-
-        let _send = this._send;
-        for(let client of this.clients) {
-            if (session_id!==undefined && client.session_id === session_id){ 
-             client.busy = false;
-            _send(client, JSON.stringify(this.bye(session_id,client_self.id)));
-            break;
-            }
-        }
-    };
-
     onConnection = (client_self) => {
         let _send = this._send;
         this.clients.add(client_self);
         client_self.on("close", (data) => {
             this.clients.delete(client_self);
-            this.onClose(client_self)
             console.log('on close id=>'+client_self.id)
         });
 
@@ -123,9 +96,9 @@ class CallHandler {
             try {
                 message = JSON.parse(message);
                 if(message.type=='new'){
-                    console.log("message.type:: " + message.type + ", \nbody: " + JSON.stringify(message));
+                    console.log(JSON.stringify(message));
                 }else{
-                    console.log("message.type:: " + message.type + ", \nto: " + message.to);
+                    console.log("message.type: " + message.type + "; to: " + message.to);
                 }
             } catch (e) {
                 console.log(e.message);
@@ -148,36 +121,13 @@ class CallHandler {
                 }
                     break;
                 case 'bye': {
-                    console.log('bye')
-                    let session = null;
-                    this.sessions.forEach((sess) => {
-                        if (sess.id === message.session_id) {
-                            session = sess;
-                        }
-                    });
-                    if (!session) {
-                        msg = {
-                            type: "error",
-                            data: {
-                                error: "Invalid session " + message.session_id,
-                            },
-                        };
-                        client_self.busy=message.is_busy
-                        console.log('sess is null set client '+client_self.id+' to busy=>'+message.is_busy);
-                        return;
-                    }else{
-                        const i=this.sessions.indexOf(session);
-                        this.sessions.splice(i,1);
-                    }
                     client_self.busy=message.is_busy
-                    client_self.session_id=null;
-                    _send(client_self,JSON.stringify(this.bye(message.session_id,session.to)));
+                    _send(client_self,JSON.stringify(this.bye()));
                     for(let client of this.clients) {
                         if (client.session_id === message.session_id && client!==client_self) {
                             try {
-                                const msg = this.bye(message.session_id, session.from);
+                                const msg = this.bye();
                                 _send(client, JSON.stringify(msg));
-                                client.session_id=null;
                                 break;
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
@@ -188,11 +138,12 @@ class CallHandler {
                     break;
                 case "offer": {
                     let peer = null;
-                    this.clients.forEach(function (client) {
-                        if (client.hasOwnProperty('id') && client.id === "" + message.to) {
+                    for(let client of this.clients) {
+                        if (client.id ===  message.to) {
                             peer = client;
+                            break;
                         }
-                    });
+                    }
 
                     if (peer != null) {
                         msg = {
@@ -201,21 +152,12 @@ class CallHandler {
                                 to: peer.id,
                                 from: client_self.id,
                                 media: message.media,
-                                session_id: message.session_id,
                                 description: message.description,
                                 mc:message.mc
                             }
                         };
                         _send(peer, JSON.stringify(msg));
-                        peer.session_id = message.session_id;
-                        client_self.session_id = message.session_id;
 
-                        let session = {
-                            id: message.session_id,
-                            from: client_self.id,
-                            to: peer.id,
-                        };
-                        this.sessions.push(session);
                         client_self.busy = true;
                         peer.busy=true;
                     }
@@ -231,15 +173,16 @@ class CallHandler {
                         }
                     };
 
-                    this.clients.forEach(function (client) {
-                        if (client.id === "" + message.to && client.session_id === message.session_id) {
+                    for(let client of this.clients) {
+                        if (client.id === message.to) {
                             try {
                                 _send(client, JSON.stringify(msg));
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
                             }
+                            break;
                         }
-                    });
+                    }
                 }
                     break;
                 case 'candidate': {
@@ -252,15 +195,16 @@ class CallHandler {
                         }
                     };
 
-                    this.clients.forEach(function (client) {
-                        if (client.id === "" + message.to && client.session_id === message.session_id) {
+                    for(let client of this.clients) {
+                        if (client.id === message.to) {
                             try {
                                 _send(client, JSON.stringify(msg));
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
                             }
+                            break;
                         }
-                    });
+                    }
                 }
                     break;
                 case 'keepalive':
@@ -280,14 +224,8 @@ class CallHandler {
         }
     }
 
-    bye(session_id, to) {
-        return {
-            type: "bye",
-            data: {
-                session_id: session_id,
-                to: to,
-            },
-        };
+    bye() {
+        return { type: "bye" };
     }
 }
 
