@@ -122,16 +122,17 @@ class CallHandler {
                     break;
                 case 'bye': {
                     client_self.busy=message.is_busy
+                    if(message.to==null)return;
                     _send(client_self,JSON.stringify(this.bye()));
                     for(let client of this.clients) {
-                        if (client.session_id === message.session_id && client!==client_self) {
+                        if (client.id==message.to) {
                             try {
                                 const msg = this.bye();
                                 _send(client, JSON.stringify(msg));
-                                break;
                             } catch (e) {
                                 console.log("onUserJoin:" + e.message);
                             }
+                            break;
                         }
                     }
                 }
