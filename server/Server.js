@@ -59,8 +59,11 @@ class CallHandler {
 
       getFreePeer = (client_self, oldPeersIds) => {
         console.log('get free peer from '+this.clients.size);
+        let clientToRemove=null;
         for(const client of this.clients) {
-            const same = (client === client_self || client.id==client_self.id);
+            const sameId = client.id == client_self.id;
+            if(sameId && clientToRemove==null)clientToRemove=client; 
+            const same = (client === client_self || sameId);
             console.log(`id=${client.id}, busy=${client.busy}, same=${same}`)
             const peer = {};
             if (!client.busy && !same && !oldPeersIds.includes(client.id)) {
@@ -76,10 +79,11 @@ class CallHandler {
                 if (client.hasOwnProperty('mc')) {
                     peer.mc = client.mc;
                 }
-                client.busy=true
+                client.busy=true;
                 return peer
             }
         }
+        if(clientToRemove!=null)this.clients.delete(clientToRemove);
         return null
     };
 
