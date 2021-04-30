@@ -62,7 +62,7 @@ class CallHandler {
         let clientToRemove=null;
         for(const client of this.clients) {
             const sameId = client.id == client_self.id;
-            if(sameId && clientToRemove==null)clientToRemove=client; 
+            if(sameId&&client!=client_self && clientToRemove==null)clientToRemove=client; 
             const same = (client === client_self || sameId);
             console.log(`id=${client.id}, busy=${client.busy}, same=${same}`)
             const peer = {};
@@ -102,7 +102,7 @@ class CallHandler {
                 if(message.type=='new'){
                     console.log(JSON.stringify(message));
                 }else{
-                    console.log("message.type: " + message.type + "; from"+client_self.id+" to: " + message.to);
+                    console.log("message.type: " + message.type + "; from "+client_self.id+" to: " + message.to);
                 }
             } catch (e) {
                 console.log(e.message);
