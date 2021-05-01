@@ -89,7 +89,7 @@ class CallHandler {
         }
         if(clientToRemove!=null){
             this.clients.delete(clientToRemove);
-            console.log('removed=>'+clientToRemove);
+            console.log('removed=>'+JSON.stringify(clientToRemove));
         }
         return null
     };
