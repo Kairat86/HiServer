@@ -62,7 +62,10 @@ class CallHandler {
         let clientToRemove=null;
         for(const client of this.clients) {
             const sameId = client.id == client_self.id;
-            if(sameId&&client!=client_self && clientToRemove==null)clientToRemove=client; 
+            if(clientToRemove==null 
+                && ((sameId && client!=client_self) ||(this.expired(client)))){
+            clientToRemove=client; 
+            }
             const same = (client === client_self || sameId);
             console.log(`id=${client.id}, busy=${client.busy}, same=${same}`)
             const peer = {};
@@ -80,6 +83,7 @@ class CallHandler {
                     peer.mc = client.mc;
                 }
                 client.busy=true;
+                client.timestamp=new Date().getTime();
                 return peer
             }
         }
@@ -87,6 +91,8 @@ class CallHandler {
         return null
     };
 
+    expired=(client)=> new Date().getTime()-client.timestamp>18000000;
+    
     onConnection = (client_self) => {
         let _send = this._send;
         this.clients.add(client_self);
@@ -115,6 +121,7 @@ class CallHandler {
                     client_self.user_agent = message.user_agent;
                     client_self.busy = false
                     client_self.mc=message.mc;
+                    client_self.timestamp=new Date().getTime();
                     const p = this.getFreePeer(client_self, message.oldPeerIds);
                     if (p==null)return
                     const msg = {
