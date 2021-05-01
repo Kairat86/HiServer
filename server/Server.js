@@ -87,7 +87,10 @@ class CallHandler {
                 return peer
             }
         }
-        if(clientToRemove!=null)this.clients.delete(clientToRemove);
+        if(clientToRemove!=null){
+            this.clients.delete(clientToRemove);
+            console.log('removed=>'+clientToRemove);
+        }
         return null
     };
 
