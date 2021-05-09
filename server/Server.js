@@ -94,7 +94,7 @@ class CallHandler {
         return null
     };
 
-    expired=(client)=> new Date().getTime()-client.timestamp>18000000;
+    expired=(client)=> new Date().getTime()-client.timestamp>17000000;
     
     onConnection = (client_self) => {
         let _send = this._send;
