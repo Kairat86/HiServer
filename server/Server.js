@@ -140,7 +140,7 @@ class CallHandler {
                         console.log('message.to is '+message.to+', returning')
                         return;
                     }
-                    _send(client_self,JSON.stringify(this.bye()));
+                    // _send(client_self,JSON.stringify(this.bye()));
                     for(let client of this.clients) {
                         if (client.id==message.to) {
                             try {
