@@ -22,7 +22,7 @@
     "react-favicon": "0.0.17",
     "serialize-javascript": "^4.0.0",
     "websocket-extensions": "^0.1.4",
-    "ws": "^5.2.1",
+    "ws": "^7.4.6",
     "yargs-parser": "^19.0.4",
     "node-fetch": ">=2.6.1",
     "node-forge": ">=0.10.0"
